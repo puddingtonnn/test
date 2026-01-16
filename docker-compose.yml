@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgresql:18/latest
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./.data/pg/mount:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "9090:9090"  
