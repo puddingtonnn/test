@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type Chat struct {
-	ID       int       `gorm:"primaryKey;autoIncrement" json:"id"`
+	ID       uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	Title    string    `gorm:"not null;size:200" json:"title"`
 	CreateAt time.Time `json:"create_at"`
 
@@ -12,7 +12,7 @@ type Chat struct {
 
 type Message struct {
 	ID       int       `gorm:"primaryKey;autoIncrement" json:"id"`
-	ChatID   int       `gorm:"not null;index" json:"chat_id"`
+	ChatID   uint      `gorm:"not null;index" json:"chat_id"`
 	Text     string    `gorm:"not null;size:5000" json:"text"`
 	CreateAt time.Time `json:"create_at"`
 }

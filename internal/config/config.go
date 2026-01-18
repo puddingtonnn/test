@@ -2,34 +2,44 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	AppPort string
 	DBDSN   string
+	AppPort string
 }
 
-func Load() (*Config, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, err
+func Load() *Config {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
 	}
 
-	cfg := &Config{
-		AppPort: os.Getenv("APP_PORT"),
-		DBDSN:   os.Getenv("DB_DSN"),
-	}
+	dbUser := getEnv("POSTGRES_USER", "postgres")
+	dbPass := getEnv("POSTGRES_PASSWORD", "secret")
+	dbName := getEnv("POSTGRES_DB", "testdb")
+	dbHost := getEnv("POSTGRES_HOST", "localhost")
+	dbPort := getEnv("POSTGRES_PORT", "5432")
 
-	if cfg.AppPort == "" {
-		cfg.AppPort = "9090"
-	}
+	appPort := getEnv("HTTP_PORT", "9090")
 
-	if cfg.DBDSN == "" {
-		return nil, fmt.Errorf("DB_DSN is not set")
-	}
+	dbdsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		dbHost, dbUser, dbPass, dbName, dbPort,
+	)
 
-	return cfg, nil
+	return &Config{
+		DBDSN:   dbdsn,
+		AppPort: appPort,
+	}
+}
+
+// getEnv возвращает значение переменной окружения или дефолтное значение
+func getEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
 }
