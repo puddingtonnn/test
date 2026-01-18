@@ -1,18 +1,27 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"github.com/puddingtonnn/test/internal/domain"
 	"github.com/puddingtonnn/test/internal/service"
 	"net/http"
 	"strconv"
 )
 
-type Handler struct {
-	svc *service.ChatService
+type ChatService interface {
+	CreateChat(ctx context.Context, title string) (*domain.Chat, error)
+	CreateMessage(ctx context.Context, chatID uint, text string) (*domain.Message, error)
+	GetChat(ctx context.Context, chatID uint, limit int) (*domain.Chat, error)
+	DeleteChat(ctx context.Context, chatID uint) error
 }
 
-func NewHandler(svc *service.ChatService) *Handler {
+type Handler struct {
+	svc ChatService
+}
+
+func NewHandler(svc ChatService) *Handler {
 	return &Handler{svc: svc}
 }
 
@@ -49,7 +58,6 @@ func (h *Handler) CreateChat(w http.ResponseWriter, r *http.Request) {
 
 // CreateMessage POST /chats/{id}/messages/
 func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
-	// Go 1.22: получаем {id} из пути
 	idStr := r.PathValue("id")
 	chatID, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {

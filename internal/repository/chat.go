@@ -19,7 +19,7 @@ func (r *ChatRepository) CreateChat(ctx context.Context, chat *domain.Chat) erro
 }
 
 func (r *ChatRepository) CreateMessage(ctx context.Context, msg *domain.Message) error {
-	var count int
+	var count int64
 	if err := r.db.WithContext(ctx).Model(&domain.Chat{}).Where("id = ?", msg.ChatID).Count(&count).Error; err != nil {
 		return err
 	}

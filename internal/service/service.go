@@ -47,10 +47,14 @@ func (s *ChatService) CreateMessage(ctx context.Context, chatID uint, text strin
 	}
 
 	err := s.repo.CreateMessage(ctx, msg)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, ErrNotFound
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
 	}
-	return msg, err
+
+	return msg, nil
 }
 
 func (s *ChatService) GetChat(ctx context.Context, chatID uint, limit int) (*domain.Chat, error) {
